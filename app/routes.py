@@ -8,7 +8,7 @@ import logging
 from flask_paginate import Pagination, get_page_parameter
 from app.services import user_service
 from app.services import ticket_service, department_service
-from app import limiter, db
+from app import db
 from datetime import datetime
 
 # Configure logging
@@ -264,7 +264,6 @@ def explore_departments():
     return render_template('explore_departments.html', title='Explore Departments', departments=departments)
 
 @main_bp.route('/login', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -305,7 +304,6 @@ def logout():
     logout_user()
     return redirect(url_for('main.login'))
 
-@limiter.limit("3 per hour")
 @main_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:

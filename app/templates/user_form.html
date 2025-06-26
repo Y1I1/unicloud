@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+        {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+                <li><strong>{{ field|capitalize }}:</strong> {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ 'Edit User' if user else 'Add New User' }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_user') if not user else url_for('admin.edit_user', user_id=user.id) }}">
+                        {{ form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    {{ form.username(class="form-control", id="username") }}
+                                    {% for error in form.username.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    {{ form.email(class="form-control", id="email") }}
+                                    {% for error in form.email.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if current_user.role == 'admin' %}
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            {{ form.role(class="form-select", id="role") }}
+                            {% for error in form.role.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% if not user %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    {{ form.password(class="form-control", id="password") }}
+                                    {% for error in form.password.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password2" class="form-label">Repeat Password</label>
+                                    {{ form.password2(class="form-control", id="password2") }}
+                                    {% for error in form.password2.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="form-check mb-3">
+                            {{ form.reset_password(class="form-check-input", id="reset_password") }}
+                            <label class="form-check-label" for="reset_password">Change Password</label>
+                        </div>
+                        <div class="row" id="password-fields" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    {{ form.password(class="form-control", id="password") }}
+                                    <small class="form-text text-muted">Leave blank to keep current password</small>
+                                    {% for error in form.password.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password2" class="form-label">Repeat Password</label>
+                                    {{ form.password2(class="form-control", id="password2") }}
+                                    {% for error in form.password2.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var resetBox = document.getElementById('reset_password');
+                            var pwFields = document.getElementById('password-fields');
+                            function togglePwFields() {
+                                pwFields.style.display = resetBox.checked ? '' : 'none';
+                            }
+                            resetBox.addEventListener('change', togglePwFields);
+                            togglePwFields();
+                        });
+                        </script>
+                        {% endif %}
+                        {% endif %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {{ 'Update User' if user else 'Create User' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Ticket #{{ ticket.id }}</h1>
+        <div>
+            {% if current_user.role == 'admin' %}
+                {% if ticket.status == 'Open' %}
+                    <form action="{{ url_for('main.close_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-success">Close Ticket</button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('main.reopen_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-warning">Reopen Ticket</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+            <a href="{{ url_for('main.edit_ticket', ticket_id=ticket.id) }}" class="btn btn-primary">Edit Ticket</a>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th style="width: 20%;">Title</th>
+                    <td>{{ ticket.title }}</td>
+                </tr>
+                <tr>
+                    <th>Author</th>
+                    <td>{{ ticket.user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Department</th>
+                    <td>{{ ticket.department.name }}</td>
+                </tr>
+                <tr>
+                    <th>Priority</th>
+                    <td>
+                        {% if ticket.priority == 'High' %}
+                            <span class="badge priority-high">{{ ticket.priority }}</span>
+                        {% elif ticket.priority == 'Normal' %}
+                            <span class="badge priority-normal">{{ ticket.priority }}</span>
+                        {% else %}
+                            <span class="badge priority-low">{{ ticket.priority }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>
+                        <span class="status-{{ ticket.status|lower }}">{{ ticket.status }}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Created At</th>
+                    <td>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ ticket.description }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %} 

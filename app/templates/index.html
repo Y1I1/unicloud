@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <a href="{{ url_for('main.create_ticket') }}" class="btn btn-primary">Create New Ticket</a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="card-value">{{ stats.total }}</div>
+            <div class="card-label">Total Tickets</div>
+        </div>
+        <div class="summary-card">
+            <div class="card-value">{{ stats.pending }}</div>
+            <div class="card-label">Pending Tickets</div>
+        </div>
+        <div class="summary-card">
+            <div class="card-value">{{ stats.closed }}</div>
+            <div class="card-label">Closed Tickets</div>
+        </div>
+    </div>
+
+    <!-- Ticket Search and Status Tabs -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <form method="get" class="d-flex" style="gap: 0.5rem;">
+            <input type="text" name="search" class="form-control" placeholder="Search tickets..." value="{{ search }}">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <button type="submit" class="btn btn-outline-secondary">Search</button>
+        </form>
+        <div class="btn-group" role="group" aria-label="Ticket status tabs">
+            <a href="{{ url_for('main.index', status='open', search=search) }}" class="btn btn-{{ 'primary' if status_filter != 'closed' else 'outline-primary' }}">Open Tickets</a>
+            <a href="{{ url_for('main.index', status='closed', search=search) }}" class="btn btn-{{ 'primary' if status_filter == 'closed' else 'outline-primary' }}">Closed Tickets</a>
+        </div>
+    </div>
+
+    <!-- Tickets Table -->
+    <div class="table-wrapper">
+        <h2 class="h5 mb-3">{{ 'Closed' if status_filter == 'closed' else 'Open' }} Tickets</h2>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Department</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>#{{ ticket.id }}</td>
+                        <td>{{ ticket.title }}</td>
+                        <td>{{ ticket.user.username }}</td>
+                        <td>{{ ticket.department.name }}</td>
+                        <td>
+                            {% if ticket.priority == 'High' %}
+                                <span class="badge priority-high">{{ ticket.priority }}</span>
+                            {% elif ticket.priority == 'Normal' %}
+                                <span class="badge priority-normal">{{ ticket.priority }}</span>
+                            {% else %}
+                                <span class="badge priority-low">{{ ticket.priority }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-{{ ticket.status|lower }}">{{ ticket.status }}</span>
+                        </td>
+                        <td>{{ ticket.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('main.ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No tickets found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination Controls -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Ticket pagination">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=pagination.prev_num, status=status_filter, search=search) }}">&laquo;</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                {% endif %}
+                {% for p in range(1, pagination.pages + 1) %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.index', page=p, status=status_filter, search=search) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=pagination.next_num, status=status_filter, search=search) }}">&raquo;</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+{% endblock %} 
